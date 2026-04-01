@@ -70,13 +70,13 @@ class TicketsTable
                     })
                     ->requiresConfirmation(),
 
-                Action::make('cerrar')
-                    ->label('Cerrar Ticket')
+                Action::make('resolver')
+                    ->label('Resolver Ticket')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn ($record) => 
                         $record !== null &&
-                        $record->estado !== 'cerrado' && 
+                        in_array($record->estado, ['abierto', 'en_progreso']) && 
                         (auth()->user()->tipo_usuario === 'ADMINISTRADOR' || (auth()->user()->tipo_usuario === 'TECNICO' && $record->tecnico_id === auth()->id()))
                     )
                     ->form([
@@ -97,14 +97,13 @@ class TicketsTable
                     ])
                     ->action(function ($record, array $data) {
                         $record->update([
-                            'estado' => 'cerrado',
-                            'fecha_cierre' => now(),
+                            'estado' => 'resuelto',
                         ]);
 
                         \App\Models\TicketHistory::create([
                             'ticket_id' => $record->id,
                             'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Ticket cerrado. Se documento la solucion en FAQ.',
+                            'cambio_descripcion' => 'Ticket resuelto por el técnico. A la espera de validación del usuario.',
                         ]);
 
                         \App\Models\FaqArticle::create([
@@ -115,6 +114,55 @@ class TicketsTable
                         ]);
                     })
                     ->requiresConfirmation(),
+
+                Action::make('aceptar_resolucion')
+                    ->label('Aceptar Solución')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn ($record) => 
+                        $record !== null &&
+                        $record->estado === 'resuelto' && 
+                        auth()->user()->tipo_usuario === 'USUARIO' && $record->usuario_id === auth()->id()
+                    )
+                    ->action(function ($record) {
+                        $record->update([
+                            'estado' => 'cerrado',
+                            'fecha_cierre' => now(),
+                        ]);
+
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $record->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'El usuario aceptó la solución y cerró el ticket.',
+                        ]);
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Aceptar Solución')
+                    ->modalDescription('¿Estás seguro que la solución resolvió tu problema? Esto cerrará el ticket.'),
+
+                Action::make('rechazar_resolucion')
+                    ->label('Rechazar Solución')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn ($record) => 
+                        $record !== null &&
+                        $record->estado === 'resuelto' && 
+                        auth()->user()->tipo_usuario === 'USUARIO' && $record->usuario_id === auth()->id()
+                    )
+                    ->action(function ($record) {
+                        $record->update([
+                            'estado' => 'en_progreso',
+                        ]);
+
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $record->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'El usuario rechazó la solución. El ticket vuelve a En Progreso.',
+                        ]);
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Rechazar Solución')
+                    ->modalDescription('¿El problema persiste? Esto devolverá el ticket a En Progreso.'),
 
                 EditAction::make(),
             ])
