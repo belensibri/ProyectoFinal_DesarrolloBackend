@@ -66,16 +66,18 @@ class EditTicket extends EditRecord
                 ->icon('heroicon-o-hand-raised')
                 ->visible(fn () => in_array(auth()->user()->tipo_usuario, ['TECNICO', 'ADMINISTRADOR']) && is_null($this->record->tecnico_id))
                 ->action(function () {
-                    $this->record->update([
-                        'tecnico_id' => auth()->id(),
-                        'estado' => 'en_progreso',
-                    ]);
+                    \Illuminate\Support\Facades\DB::transaction(function () {
+                        $this->record->update([
+                            'tecnico_id' => auth()->id(),
+                            'estado' => 'en_progreso',
+                        ]);
 
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'Ticket asignado a ' . auth()->user()->name . ' y cambiado a En Progreso.',
-                    ]);
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $this->record->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'Ticket asignado a ' . auth()->user()->name . ' y cambiado a En Progreso.',
+                        ]);
+                    });
 
                     $this->refreshFormData(['tecnico_id', 'estado']);
                 })
@@ -106,23 +108,25 @@ class EditTicket extends EditRecord
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    $this->record->update([
-                        'estado' => 'cerrado',
-                        'fecha_cierre' => now(),
-                    ]);
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+                        $this->record->update([
+                            'estado' => 'cerrado',
+                            'fecha_cierre' => now(),
+                        ]);
 
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'Ticket cerrado. Se documento la solucion en FAQ.',
-                    ]);
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $this->record->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'Ticket cerrado. Se documento la solucion en FAQ.',
+                        ]);
 
-                    \App\Models\FaqArticle::create([
-                        'titulo' => $this->record->titulo,
-                        'contenido' => $data['solucion'],
-                        'categoria' => $data['categoria'],
-                        'usuario_id' => auth()->id(),
-                    ]);
+                        \App\Models\FaqArticle::create([
+                            'titulo' => $this->record->titulo,
+                            'contenido' => $data['solucion'],
+                            'categoria' => $data['categoria'],
+                            'usuario_id' => auth()->id(),
+                        ]);
+                    });
                     $this->refreshFormData(['estado', 'fecha_cierre']);
                 })
                 ->successNotificationTitle('Ticket cerrado y FAQ creado correctamente.')

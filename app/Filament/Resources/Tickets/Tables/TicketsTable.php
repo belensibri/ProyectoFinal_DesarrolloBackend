@@ -57,16 +57,18 @@ class TicketsTable
                     ->icon('heroicon-o-hand-raised')
                     ->visible(fn ($record) => $record !== null && in_array(auth()->user()->tipo_usuario, ['TECNICO', 'ADMINISTRADOR']) && is_null($record->tecnico_id))
                     ->action(function ($record) {
-                        $record->update([
-                            'tecnico_id' => auth()->id(),
-                            'estado' => 'en_progreso',
-                        ]);
+                        \Illuminate\Support\Facades\DB::transaction(function () use ($record) {
+                            $record->update([
+                                'tecnico_id' => auth()->id(),
+                                'estado' => 'en_progreso',
+                            ]);
 
-                        \App\Models\TicketHistory::create([
-                            'ticket_id' => $record->id,
-                            'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Ticket asignado a ' . auth()->user()->name . ' y cambiado a En Progreso.',
-                        ]);
+                            \App\Models\TicketHistory::create([
+                                'ticket_id' => $record->id,
+                                'usuario_id' => auth()->id(),
+                                'cambio_descripcion' => 'Ticket asignado a ' . auth()->user()->name . ' y cambiado a En Progreso.',
+                            ]);
+                        });
                     })
                     ->requiresConfirmation(),
 
@@ -96,23 +98,25 @@ class TicketsTable
                             ->required(),
                     ])
                     ->action(function ($record, array $data) {
-                        $record->update([
-                            'estado' => 'cerrado',
-                            'fecha_cierre' => now(),
-                        ]);
+                        \Illuminate\Support\Facades\DB::transaction(function () use ($record, $data) {
+                            $record->update([
+                                'estado' => 'cerrado',
+                                'fecha_cierre' => now(),
+                            ]);
 
-                        \App\Models\TicketHistory::create([
-                            'ticket_id' => $record->id,
-                            'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Ticket cerrado. Se documento la solucion en FAQ.',
-                        ]);
+                            \App\Models\TicketHistory::create([
+                                'ticket_id' => $record->id,
+                                'usuario_id' => auth()->id(),
+                                'cambio_descripcion' => 'Ticket cerrado. Se documento la solucion en FAQ.',
+                            ]);
 
-                        \App\Models\FaqArticle::create([
-                            'titulo' => $record->titulo,
-                            'contenido' => $data['solucion'],
-                            'categoria' => $data['categoria'],
-                            'usuario_id' => auth()->id(),
-                        ]);
+                            \App\Models\FaqArticle::create([
+                                'titulo' => $record->titulo,
+                                'contenido' => $data['solucion'],
+                                'categoria' => $data['categoria'],
+                                'usuario_id' => auth()->id(),
+                            ]);
+                        });
                     })
                     ->requiresConfirmation(),
 
