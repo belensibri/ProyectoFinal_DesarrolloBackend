@@ -65,11 +65,34 @@ class AttachmentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->visible(fn (RelationManager $livewire) => auth()->user()->can('addAttachment', $livewire->getOwnerRecord())),
+                    ->visible(fn (RelationManager $livewire) => auth()->user()->can('addAttachment', $livewire->getOwnerRecord()))
+                    ->after(function (RelationManager $livewire) {
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $livewire->getOwnerRecord()->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'Se agregó un adjunto al ticket.',
+                        ]);
+                    }),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (Model $record) => auth()->id() === $record->usuario_id || auth()->user()->tipo_usuario === 'ADMINISTRADOR')
+                    ->after(function (RelationManager $livewire) {
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $livewire->getOwnerRecord()->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'Un adjunto fue modificado.',
+                        ]);
+                    }),
+                DeleteAction::make()
+                    ->visible(fn (Model $record) => auth()->id() === $record->usuario_id || auth()->user()->tipo_usuario === 'ADMINISTRADOR')
+                    ->before(function (RelationManager $livewire) {
+                        \App\Models\TicketHistory::create([
+                            'ticket_id' => $livewire->getOwnerRecord()->id,
+                            'usuario_id' => auth()->id(),
+                            'cambio_descripcion' => 'Un adjunto fue eliminado.',
+                        ]);
+                    }),
             ])
             ->toolbarActions([]);
     }
