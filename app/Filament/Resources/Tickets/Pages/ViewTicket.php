@@ -58,6 +58,7 @@ class ViewTicket extends ViewRecord
             Action::make('agregarComentario')
                 ->label('Add comentario')
                 ->icon('heroicon-o-chat-bubble-left-right')
+                ->visible(fn () => auth()->user()->can('addComment', $this->record))
                 ->form([
                     Textarea::make('contenido')
                         ->label('Comentario')

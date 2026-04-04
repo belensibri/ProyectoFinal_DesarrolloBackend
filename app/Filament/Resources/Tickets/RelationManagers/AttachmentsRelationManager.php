@@ -64,7 +64,8 @@ class AttachmentsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->visible(fn (RelationManager $livewire) => auth()->user()->can('addAttachment', $livewire->getOwnerRecord())),
             ])
             ->recordActions([
                 EditAction::make(),

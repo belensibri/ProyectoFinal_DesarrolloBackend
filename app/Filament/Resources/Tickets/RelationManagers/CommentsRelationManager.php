@@ -62,7 +62,8 @@ class CommentsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->visible(fn (RelationManager $livewire) => auth()->user()->can('addComment', $livewire->getOwnerRecord())),
             ])
             ->recordActions([
                 EditAction::make(),
