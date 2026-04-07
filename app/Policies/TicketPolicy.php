@@ -69,6 +69,11 @@ class TicketPolicy
             && $ticket->comments()->where('rol', Comment::ROL_TECNICO)->exists();
     }
 
+    public function reassign(User $user, Ticket $ticket): bool
+    {
+        return $user->isAdministrador() && $ticket->isInProgress();
+    }
+
     public function addComment(User $user, Ticket $ticket): bool
     {
         if ($ticket->isClosed() || $user->isAdministrador() || ! $ticket->isInProgress()) {

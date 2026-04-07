@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Tickets\Tables;
 
 use App\Filament\Resources\Tickets\TicketResource;
-use App\Models\Comment;
 use App\Models\Ticket;
+use App\Models\User;
 use App\Services\TicketService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -106,6 +106,37 @@ class TicketsTable
                     ])
                     ->action(fn (Ticket $record, array $data) => app(TicketService::class)->closeTicket($record, auth()->user(), $data))
                     ->successNotificationTitle('Ticket cerrado y FAQ creado correctamente.')
+                    ->requiresConfirmation(),
+
+                Action::make('reasignar')
+                    ->label('Reasignar')
+                    ->icon('heroicon-o-arrow-path-rounded-square')
+                    ->color('warning')
+                    ->visible(fn (Ticket $record) => auth()->user()->can('reassign', $record))
+                    ->form([
+                        \Filament\Forms\Components\Select::make('tecnico_id')
+                            ->label('Nuevo técnico')
+                            ->options(fn () => User::query()
+                                ->where('tipo_usuario', 'TECNICO')
+                                ->orderBy('name')
+                                ->pluck('name', 'id'))
+                            ->rule(function (Ticket $record) {
+                                return function (string $attribute, $value, \Closure $fail) use ($record): void {
+                                    if ((int) $value === (int) $record->tecnico_id) {
+                                        $fail('Debes seleccionar un técnico distinto al actualmente asignado.');
+                                    }
+                                };
+                            })
+                            ->required(),
+                    ])
+                    ->action(function (Ticket $record, array $data): void {
+                        $newTechnician = User::query()
+                            ->where('tipo_usuario', 'TECNICO')
+                            ->findOrFail($data['tecnico_id']);
+
+                        app(TicketService::class)->reassignTicket($record, $newTechnician, auth()->user());
+                    })
+                    ->successNotificationTitle('Ticket reasignado correctamente.')
                     ->requiresConfirmation(),
 
                 EditAction::make()

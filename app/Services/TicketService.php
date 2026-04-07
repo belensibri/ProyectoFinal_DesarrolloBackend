@@ -137,6 +137,57 @@ class TicketService
         });
     }
 
+    public function reassignTicket(Ticket $ticket, User $newTechnician, User $admin): Ticket
+    {
+        if (! $admin->isAdministrador()) {
+            throw ValidationException::withMessages([
+                'ticket' => 'Solo un administrador puede reasignar tickets.',
+            ]);
+        }
+
+        if ($ticket->isClosed() || ! $ticket->isInProgress()) {
+            throw ValidationException::withMessages([
+                'ticket' => 'Solo se pueden reasignar tickets en_proceso.',
+            ]);
+        }
+
+        if (! $newTechnician->isTecnico()) {
+            throw ValidationException::withMessages([
+                'tecnico_id' => 'El usuario seleccionado no es un técnico válido.',
+            ]);
+        }
+
+        if ($ticket->tecnico_id === $newTechnician->id) {
+            throw ValidationException::withMessages([
+                'tecnico_id' => 'Debes seleccionar un técnico distinto al actualmente asignado.',
+            ]);
+        }
+
+        $oldTechnician = $ticket->technician;
+
+        return DB::transaction(function () use ($ticket, $newTechnician, $admin, $oldTechnician) {
+            $ticket->forceFill([
+                'tecnico_id' => $newTechnician->id,
+            ])->save();
+
+            $previousTechnicianName = $oldTechnician?->name ?? 'Sin técnico asignado';
+            $newTechnicianName = $newTechnician->name;
+
+            $this->logHistory(
+                $ticket,
+                $admin,
+                'ticket_reasignado',
+                sprintf(
+                    'Ticket reasignado de %s a %s.',
+                    $previousTechnicianName,
+                    $newTechnicianName
+                )
+            );
+
+            return $ticket->refresh()->load('technician');
+        });
+    }
+
     private function logHistory(Ticket $ticket, User $user, string $action, ?string $comment = null): TicketHistory
     {
         return $ticket->ticketHistories()->create([
