@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TicketService
@@ -45,7 +46,7 @@ class TicketService
         });
     }
 
-    public function addComment(Ticket $ticket, User $actor, array $data): Comment
+    public function addMessageToTicket(Ticket $ticket, User $actor, array $data): Comment
     {
         if ($ticket->isClosed()) {
             throw ValidationException::withMessages([
@@ -53,33 +54,39 @@ class TicketService
             ]);
         }
 
-        $expectedRole = $actor->isTecnico() ? Comment::ROL_TECNICO : Comment::ROL_USUARIO;
-
-        if (($data['rol'] ?? null) !== $expectedRole) {
+        if (! $ticket->isInProgress()) {
             throw ValidationException::withMessages([
-                'rol' => 'El rol del comentario no coincide con el rol del usuario autenticado.',
+                'ticket' => 'Solo se pueden enviar mensajes cuando el ticket está en_proceso.',
             ]);
         }
+
+        if ($actor->isAdministrador()) {
+            throw ValidationException::withMessages([
+                'ticket' => 'Los administradores no pueden enviar mensajes en la conversación.',
+            ]);
+        }
+
+        $messageRole = $actor->isTecnico() ? Comment::ROL_TECNICO : Comment::ROL_USUARIO;
 
         return DB::transaction(function () use ($ticket, $actor, $data) {
             $comment = $ticket->comments()->create([
                 'usuario_id' => $actor->id,
-                'rol' => $data['rol'],
+                'rol' => $actor->isTecnico() ? Comment::ROL_TECNICO : Comment::ROL_USUARIO,
                 'contenido' => $data['contenido'],
             ]);
 
             foreach ($this->normalizeAttachments($data['attachments'] ?? []) as $attachment) {
-                $this->storeAttachment($ticket, $actor, $attachment);
+                $this->storeAttachment($comment, $ticket, $actor, $attachment);
             }
 
             $this->logHistory(
                 $ticket,
                 $actor,
                 'comentario_agregado',
-                sprintf('Se agregó un comentario de tipo %s.', $data['rol'])
+                sprintf('Se agregó un comentario de tipo %s.', $comment->rol)
             );
 
-            return $comment->refresh();
+            return $comment->refresh()->load(['user', 'attachments']);
         });
     }
 
@@ -197,9 +204,9 @@ class TicketService
         ]);
     }
 
-    private function storeAttachment(Ticket $ticket, User $user, UploadedFile|string $attachment): Attachment
+    private function storeAttachment(Comment $comment, Ticket $ticket, User $user, UploadedFile|string $attachment): Attachment
     {
-        return $ticket->attachments()->create($this->buildAttachmentPayload($ticket, $user, $attachment));
+        return $ticket->attachments()->create($this->buildAttachmentPayload($comment, $ticket, $user, $attachment));
     }
 
     /**
@@ -221,22 +228,32 @@ class TicketService
     /**
      * @return array<string, string|int>
      */
-    private function buildAttachmentPayload(Ticket $ticket, User $user, UploadedFile|string $attachment): array
+    private function buildAttachmentPayload(Comment $comment, Ticket $ticket, User $user, UploadedFile|string $attachment): array
     {
         if ($attachment instanceof UploadedFile) {
-            $path = $attachment->store('ticket-attachments', 'public');
+            $storedFilename = Str::uuid() . '.' . $attachment->getClientOriginalExtension();
+            $path = $attachment->storeAs("comments/{$comment->id}", $storedFilename, 'public');
             $size = $attachment->getSize() ?? 0;
+            $name = $attachment->getClientOriginalName();
+            $mimeType = $attachment->getMimeType() ?: $attachment->getClientMimeType();
         } else {
             $path = $attachment;
             $size = Storage::disk('public')->exists($path)
                 ? Storage::disk('public')->size($path)
                 : 0;
+            $name = basename($path);
+            $mimeType = Storage::disk('public')->exists($path)
+                ? Storage::disk('public')->mimeType($path)
+                : null;
         }
 
         return [
+            'comentario_id' => $comment->id,
             'ticket_id' => $ticket->id,
             'usuario_id' => $user->id,
             'ruta_archivo' => $path,
+            'nombre' => $name,
+            'mime_type' => $mimeType,
             'size' => (string) $size,
         ];
     }

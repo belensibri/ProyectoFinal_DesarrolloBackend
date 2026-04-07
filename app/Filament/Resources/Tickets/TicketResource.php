@@ -36,8 +36,6 @@ class TicketResource extends Resource
     {
         return [
             RelationManagers\TicketHistoriesRelationManager::class,
-            RelationManagers\CommentsRelationManager::class,
-            RelationManagers\AttachmentsRelationManager::class,
         ];
     }
 

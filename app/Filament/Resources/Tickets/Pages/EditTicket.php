@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Tickets\Pages;
 
 use App\Filament\Resources\Tickets\TicketResource;
 use Filament\Actions\Action;
-use App\Models\Comment;
 use App\Services\TicketService;
 use Filament\Resources\Pages\EditRecord;
 
@@ -118,20 +117,6 @@ class EditTicket extends EditRecord
                 })
                 ->successNotificationTitle('Ticket cerrado y FAQ creado correctamente.')
                 ->requiresConfirmation(),
-
-            Action::make('agregarBitacora')
-                ->label('Agregar bitácora')
-                ->visible(fn () => auth()->user()->can('create', [Comment::class, $this->record, Comment::ROL_TECNICO]))
-                ->form([
-                    \Filament\Forms\Components\Textarea::make('contenido')
-                        ->required(),
-                ])
-                ->action(function (array $data): void {
-                    app(TicketService::class)->addComment($this->record, auth()->user(), [
-                        'rol' => Comment::ROL_TECNICO,
-                        'contenido' => $data['contenido'],
-                    ]);
-                }),
         ];
     }
 }

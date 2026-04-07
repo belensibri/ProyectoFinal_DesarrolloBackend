@@ -2,13 +2,17 @@
 
 namespace App\Filament\Resources\Tickets\Pages;
 
+use App\Filament\Livewire\Tickets\TicketChat;
 use App\Filament\Resources\Tickets\TicketResource;
-use App\Models\Comment;
 use App\Services\TicketService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -17,6 +21,8 @@ use Filament\Schemas\Schema;
 class ViewTicket extends ViewRecord
 {
     protected static string $resource = TicketResource::class;
+
+    public string $activeContentTab = 'summary';
 
     public function infolist(Schema $schema): Schema
     {
@@ -57,31 +63,25 @@ class ViewTicket extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        $user = auth()->user();
-
         return [
             Action::make('agregarComentario')
-                ->label($user->isTecnico() ? 'Agregar bitácora' : 'Agregar comentario')
+                ->label('Agregar comentario')
                 ->icon('heroicon-o-chat-bubble-left-right')
-                ->visible(fn () => $user->can('addComment', $this->record))
+                ->visible(fn () => auth()->user()->can('addComment', $this->record))
                 ->form([
                     Textarea::make('contenido')
-                        ->label('Comentario')
+                        ->label('Mensaje')
                         ->required()
                         ->columnSpanFull(),
                     FileUpload::make('attachments')
-                        ->label('Imágenes adjuntas')
-                        ->disk('public')
-                        ->directory('ticket-attachments')
-                        ->image()
-                        ->imageEditor()
+                        ->label('Archivos')
                         ->multiple()
+                        ->disk('public')
                         ->acceptedFileTypes(['image/png', 'image/jpeg'])
-                        ->visible(fn () => auth()->user()->can('addComment', $this->record)),
+                        ->maxSize(2048),
                 ])
                 ->action(function (array $data): void {
-                    app(TicketService::class)->addComment($this->record, auth()->user(), [
-                        'rol' => auth()->user()->isTecnico() ? Comment::ROL_TECNICO : Comment::ROL_USUARIO,
+                    app(TicketService::class)->addMessageToTicket($this->record, auth()->user(), [
                         'contenido' => $data['contenido'],
                         'attachments' => $data['attachments'] ?? [],
                     ]);
@@ -90,5 +90,32 @@ class ViewTicket extends ViewRecord
             EditAction::make()
                 ->visible(fn () => auth()->user()->can('update', $this->record)),
         ];
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make('TicketTabs')
+                    ->livewireProperty('activeContentTab')
+                    ->tabs([
+                        'summary' => Tab::make('Resumen')
+                            ->schema([
+                                Section::make('Resumen del ticket')
+                                    ->schema([
+                                        EmbeddedSchema::make('infolist'),
+                                    ]),
+                                $this->getRelationManagersContentComponent(),
+                            ]),
+                        'conversation' => Tab::make('Conversacion')
+                            ->schema([
+                                Livewire::make(TicketChat::class, [
+                                    'record' => $this->record,
+                                ])
+                                    ->key('ticket-chat-' . $this->record->getKey()),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 }

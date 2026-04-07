@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('comentario_id')->constrained('comments')->onDelete('cascade');
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+
             $table->string('ruta_archivo');
+            $table->string('nombre')->nullable();
+            $table->string('mime_type')->nullable();
             $table->integer('size');
             $table->timestamps();
         });

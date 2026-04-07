@@ -28,4 +28,9 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class, 'comentario_id');
+    }
 }
