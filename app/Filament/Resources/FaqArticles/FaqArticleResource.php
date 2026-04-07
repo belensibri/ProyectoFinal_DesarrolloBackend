@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\FaqArticles;
 
-use App\Filament\Resources\FaqArticles\Pages\CreateFaqArticle;
-use App\Filament\Resources\FaqArticles\Pages\EditFaqArticle;
 use App\Filament\Resources\FaqArticles\Pages\ListFaqArticles;
-use App\Filament\Resources\FaqArticles\Schemas\FaqArticleForm;
 use App\Filament\Resources\FaqArticles\Tables\FaqArticlesTable;
 use App\Models\FaqArticle;
 use BackedEnum;
@@ -22,7 +19,7 @@ class FaqArticleResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return FaqArticleForm::configure($schema);
+        return $schema;
     }
 
     public static function table(Table $table): Table

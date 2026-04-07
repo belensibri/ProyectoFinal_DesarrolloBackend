@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
             $table->string('ruta_archivo');
-            $table->int('size');
+            $table->integer('size');
             $table->timestamps();
         });
     }
