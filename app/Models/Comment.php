@@ -9,10 +9,14 @@ class Comment extends Model
 {
     use HasFactory;
 
+    public const ROL_TECNICO = 'tecnico';
+    public const ROL_USUARIO = 'usuario';
+
     protected $fillable = [
         'ticket_id',
         'usuario_id',
-        'contenido'
+        'rol',
+        'contenido',
     ];
 
     public function ticket()

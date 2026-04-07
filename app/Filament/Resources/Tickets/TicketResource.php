@@ -10,6 +10,7 @@ use App\Filament\Resources\Tickets\Schemas\TicketForm;
 use App\Filament\Resources\Tickets\Tables\TicketsTable;
 use App\Models\Ticket;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -50,22 +51,10 @@ class TicketResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
-        $user = auth()->user();
-
-        if ($user->tipo_usuario === 'USUARIO') {
-            return $query->where('usuario_id', $user->id);
-        }
-
-        if ($user->tipo_usuario === 'TECNICO') {
-            return $query->where(function ($q) use ($user) {
-                $q->where('tecnico_id', $user->id)
-                  ->orWhereNull('tecnico_id');
-            });
-        }
-
-        return $query;
+        return parent::getEloquentQuery()
+            ->with(['user', 'technician', 'faqArticle'])
+            ->visibleTo(auth()->user());
     }
 }

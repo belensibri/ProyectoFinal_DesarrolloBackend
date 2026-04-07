@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\FaqArticles\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -18,8 +15,10 @@ class FaqArticlesTable
                     ->searchable(),
                 TextColumn::make('categoria')
                     ->searchable(),
-                TextColumn::make('usuario_id')
-                    ->numeric()
+                TextColumn::make('ticket.titulo')
+                    ->label('Ticket'),
+                TextColumn::make('user.name')
+                    ->label('Documentado por')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -33,13 +32,7 @@ class FaqArticlesTable
             ->filters([
                 //
             ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->recordActions([])
+            ->toolbarActions([]);
     }
 }

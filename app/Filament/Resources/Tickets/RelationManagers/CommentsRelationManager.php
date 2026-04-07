@@ -26,7 +26,7 @@ class CommentsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return false;
+        return true;
     }
 
     public function form(Schema $schema): Schema
@@ -50,6 +50,8 @@ class CommentsRelationManager extends RelationManager
                 TextColumn::make('user.name')
                     ->label('Usuario')
                     ->placeholder('Sin usuario'),
+                TextColumn::make('rol')
+                    ->badge(),
                 TextColumn::make('contenido')
                     ->searchable()
                     ->wrap(),
@@ -61,37 +63,8 @@ class CommentsRelationManager extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                CreateAction::make()
-                    ->visible(fn (RelationManager $livewire) => auth()->user()->can('addComment', $livewire->getOwnerRecord()))
-                    ->after(function (RelationManager $livewire) {
-                        \App\Models\TicketHistory::create([
-                            'ticket_id' => $livewire->getOwnerRecord()->id,
-                            'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Se agregó un comentario al ticket.',
-                        ]);
-                    }),
-            ])
-            ->recordActions([
-                EditAction::make()
-                    ->visible(fn (Model $record) => auth()->id() === $record->usuario_id || auth()->user()->tipo_usuario === 'ADMINISTRADOR')
-                    ->after(function (RelationManager $livewire) {
-                        \App\Models\TicketHistory::create([
-                            'ticket_id' => $livewire->getOwnerRecord()->id,
-                            'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Un comentario fue modificado.',
-                        ]);
-                    }),
-                DeleteAction::make()
-                    ->visible(fn (Model $record) => auth()->id() === $record->usuario_id || auth()->user()->tipo_usuario === 'ADMINISTRADOR')
-                    ->before(function (RelationManager $livewire) {
-                        \App\Models\TicketHistory::create([
-                            'ticket_id' => $livewire->getOwnerRecord()->id,
-                            'usuario_id' => auth()->id(),
-                            'cambio_descripcion' => 'Un comentario fue eliminado.',
-                        ]);
-                    }),
-            ])
+            ->headerActions([])
+            ->recordActions([])
             ->toolbarActions([]);
     }
 }

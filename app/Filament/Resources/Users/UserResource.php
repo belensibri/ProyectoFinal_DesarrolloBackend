@@ -45,9 +45,4 @@ class UserResource extends Resource
             'edit' => EditUser::route('/{record}/edit'),
         ];
     }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()->tipo_usuario === 'ADMINISTRADOR';
-    }
 }

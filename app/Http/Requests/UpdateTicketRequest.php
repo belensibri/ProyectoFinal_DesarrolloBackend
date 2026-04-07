@@ -8,16 +8,18 @@ class UpdateTicketRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $ticket = $this->route('ticket');
+
+        return $ticket !== null && ($this->user()?->can('update', $ticket) ?? false);
     }
 
     public function rules(): array
     {
         return [
-            'department_id' => 'sometimes|exists:departments,id',
-            'titulo' => 'sometimes|string|max:255',
-            'descripcion' => 'sometimes|string',
-            'prioridad' => 'sometimes|in:baja,media,alta'
+            'titulo' => ['sometimes', 'string', 'max:255'],
+            'descripcion' => ['sometimes', 'string'],
+            'categoria' => ['sometimes', 'nullable', 'in:backend,frontend,bases_de_datos,devops,testing,seguridad,otro'],
+            'prioridad' => ['sometimes', 'in:baja,media,alta'],
         ];
     }
 }

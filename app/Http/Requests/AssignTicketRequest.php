@@ -8,13 +8,13 @@ class AssignTicketRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $ticket = $this->route('ticket');
+
+        return $ticket !== null && ($this->user()?->can('assign', $ticket) ?? false);
     }
 
     public function rules(): array
     {
-        return [
-            'tecnico_id' => 'required|exists:users,id'
-        ];
+        return [];
     }
 }

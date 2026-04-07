@@ -18,8 +18,9 @@ return new class extends Migration
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
             $table->string('titulo');
             $table->text('descripcion');
-            $table->enum('estado', ['abierto', 'en_progreso', 'resuelto', 'cerrado'])->default('abierto');
-            $table->enum('prioridad', ['baja', 'media', 'alta'])->default('media');
+            $table->enum('categoria', ['backend', 'frontend', 'bases_de_datos', 'devops', 'testing', 'seguridad', 'otro'])->default('otro');
+            $table->enum('estado', ['activo', 'en_proceso', 'cerrado'])->default('activo');
+            $table->enum('prioridad', ['baja', 'media', 'alta'])->default('baja');
             $table->timestamp('fecha_creacion')->useCurrent();
             $table->timestamp('fecha_cierre')->nullable();
             $table->timestamps();

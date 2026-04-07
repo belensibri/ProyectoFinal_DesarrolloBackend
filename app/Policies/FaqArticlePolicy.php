@@ -7,8 +7,28 @@ use App\Models\User;
 
 class FaqArticlePolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return $user->isUsuario() || $user->isTecnico() || $user->isAdministrador();
+    }
+
+    public function view(User $user, FaqArticle $faqArticle): bool
+    {
+        return $this->viewAny($user);
+    }
+
     public function create(User $user): bool
     {
-        return true; // Todos pueden crear artículos según los requerimientos
+        return false;
+    }
+
+    public function update(User $user, FaqArticle $faqArticle): bool
+    {
+        return false;
+    }
+
+    public function delete(User $user, FaqArticle $faqArticle): bool
+    {
+        return false;
     }
 }

@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources\Tickets\Schemas;
 
+use App\Models\Ticket;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
@@ -13,28 +17,34 @@ class TicketForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Hidden::make('usuario_id')
+                Hidden::make('usuario_id')
                     ->default(fn () => auth()->id()),
 
-                \Filament\Forms\Components\TextInput::make('titulo')
-                    ->required(),
+                Hidden::make('estado')
+                    ->default(Ticket::ESTADO_ACTIVO),
 
-                \Filament\Forms\Components\Textarea::make('descripcion')
+                TextInput::make('titulo')
+                    ->required()
+                    ->maxLength(255),
+
+                Textarea::make('descripcion')
                     ->required()
                     ->columnSpanFull(),
 
-                \Filament\Forms\Components\Select::make('estado')
+                Select::make('categoria')
                     ->options([
-                        'abierto' => 'Abierto',
-                        'en_progreso' => 'En Progreso',
-                        'resuelto' => 'Resuelto',
-                        'cerrado' => 'Cerrado',
+                        'backend' => 'Backend',
+                        'frontend' => 'Frontend',
+                        'bases_de_datos' => 'Bases de Datos',
+                        'devops' => 'DevOps',
+                        'testing' => 'Testing',
+                        'seguridad' => 'Seguridad',
+                        'otro' => 'Otro',
                     ])
-                    ->required()
-                    ->default('abierto')
-                    ->visible(fn () => in_array(auth()->user()->tipo_usuario, ['ADMINISTRADOR', 'TECNICO'])),
+                    ->default('otro')
+                    ->required(),
 
-                \Filament\Forms\Components\Select::make('prioridad')
+                Select::make('prioridad')
                     ->options([
                         'baja' => 'Baja',
                         'media' => 'Media',
@@ -43,14 +53,30 @@ class TicketForm
                     ->required()
                     ->default('media'),
 
-                \Filament\Forms\Components\DateTimePicker::make('fecha_creacion')
+                Select::make('estado')
+                    ->options([
+                        Ticket::ESTADO_ACTIVO => 'Activo',
+                        'en_progreso' => 'En Progreso',
+                        Ticket::ESTADO_CERRADO => 'Cerrado',
+                    ])
+                    ->visible(fn (?Ticket $record) => auth()->user()->isAdministrador() && $record !== null)
+                    ->disabled(),
+
+                DateTimePicker::make('fecha_creacion')
                     ->default(now())
                     ->disabled()
+                    ->dehydrated(false)
                     ->required(),
 
-                \Filament\Forms\Components\DateTimePicker::make('fecha_cierre')
+                DateTimePicker::make('fecha_cierre')
                     ->disabled()
-                    ->visible(fn () => in_array(auth()->user()->tipo_usuario, ['ADMINISTRADOR', 'TECNICO'])),
+                    ->dehydrated(false)
+                    ->visible(fn (?Ticket $record) => $record !== null),
+
+                Placeholder::make('ticket_lifecycle_notice')
+                    ->label('Flujo')
+                    ->content('Los tickets nuevos se crean como activo, un técnico los toma para pasar a en_proceso y solo el técnico asignado puede cerrarlos con FAQ.')
+                    ->columnSpanFull(),
             ]);
     }
 }

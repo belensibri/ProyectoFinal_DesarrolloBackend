@@ -36,7 +36,7 @@ class User extends Authenticatable
         return $this->hasMany(Ticket::class, 'usuario_id');
     }
 
-    public function assigned_tickets()
+    public function assignedTickets()
     {
         return $this->hasMany(Ticket::class, 'tecnico_id');
     }
@@ -46,13 +46,28 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class, 'usuario_id');
     }
 
-    public function faq_articles()
+    public function faqArticles()
     {
         return $this->hasMany(FaqArticle::class, 'usuario_id');
     }
 
-    public function ticket_histories()
+    public function ticketHistories()
     {
         return $this->hasMany(TicketHistory::class, 'usuario_id');
+    }
+
+    public function isUsuario(): bool
+    {
+        return $this->tipo_usuario === 'USUARIO';
+    }
+
+    public function isTecnico(): bool
+    {
+        return $this->tipo_usuario === 'TECNICO';
+    }
+
+    public function isAdministrador(): bool
+    {
+        return $this->tipo_usuario === 'ADMINISTRADOR';
     }
 }

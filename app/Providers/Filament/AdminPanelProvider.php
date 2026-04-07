@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            // The admin panel is the primary interface of this application.
             ->login()
             ->colors([
                 'primary' => Color::Amber,
