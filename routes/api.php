@@ -1,10 +1,13 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-});
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| This project currently uses Filament as its canonical application flow.
+| There is no public REST API exposed from this codebase at the moment.
+| Keep this file intentionally empty until dedicated API controllers and
+| request validation are introduced.
+|
+*/

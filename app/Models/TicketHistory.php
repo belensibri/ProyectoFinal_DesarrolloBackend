@@ -12,7 +12,8 @@ class TicketHistory extends Model
     protected $fillable = [
         'ticket_id',
         'usuario_id',
-        'cambio_descripcion'
+        'accion',
+        'comentario',
     ];
 
     public function ticket()

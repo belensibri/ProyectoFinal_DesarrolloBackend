@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->enum('rol', ['tecnico', 'usuario']);
             $table->text('contenido');
             $table->timestamps();
         });

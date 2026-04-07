@@ -9,6 +9,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +27,7 @@ class AttachmentsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return false;
+        return true;
     }
 
     public function form(Schema $schema): Schema
@@ -51,10 +52,16 @@ class AttachmentsRelationManager extends RelationManager
                 TextColumn::make('user.name')
                     ->label('Usuario')
                     ->placeholder('Sin usuario'),
+                ImageColumn::make('ruta_archivo')
+                    ->label('Vista previa')
+                    ->disk('public')
+                    ->square(),
                 TextColumn::make('ruta_archivo')
                     ->label('Archivo')
                     ->searchable()
                     ->wrap(),
+                TextColumn::make('size')
+                    ->label('Tamaño (bytes)'),
                 TextColumn::make('created_at')
                     ->label('Fecha')
                     ->dateTime()
@@ -63,13 +70,8 @@ class AttachmentsRelationManager extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                CreateAction::make(),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
+            ->headerActions([])
+            ->recordActions([])
             ->toolbarActions([]);
     }
 }

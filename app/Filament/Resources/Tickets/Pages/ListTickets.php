@@ -13,7 +13,8 @@ class ListTickets extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->visible(fn () => auth()->user()->can('create', \App\Models\Ticket::class)),
         ];
     }
 }

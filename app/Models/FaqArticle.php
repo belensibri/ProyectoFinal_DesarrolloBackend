@@ -11,13 +11,24 @@ class FaqArticle extends Model
 
     protected $fillable = [
         'titulo',
-        'contenido',
+        'descripcion_problema',
+        'resolucion',
+        'causa_raiz',
+        'tipo_resolucion',
+        'es_reutilizable',
         'categoria',
         'usuario_id'
+        ,
+        'ticket_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function ticket()
+    {
+        return $this->belongsTo(Ticket::class);
     }
 }

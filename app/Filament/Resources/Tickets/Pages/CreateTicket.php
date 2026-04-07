@@ -17,10 +17,10 @@ class CreateTicket extends CreateRecord
 
     protected function afterCreate(): void
     {
-        TicketHistory::create([
-            'ticket_id' => $this->record->id,
+        $this->record->ticketHistories()->create([
             'usuario_id' => auth()->id(),
-            'cambio_descripcion' => 'Ticket creado.',
+            'accion' => 'ticket_creado',
+            'comentario' => 'Ticket creado.',
         ]);
     }
 }

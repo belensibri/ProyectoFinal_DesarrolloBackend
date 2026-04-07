@@ -41,13 +41,6 @@ class FaqArticleResource extends Resource
     {
         return [
             'index' => ListFaqArticles::route('/'),
-            'create' => CreateFaqArticle::route('/create'),
-            'edit' => EditFaqArticle::route('/{record}/edit'),
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()->tipo_usuario === 'ADMINISTRADOR';
     }
 }

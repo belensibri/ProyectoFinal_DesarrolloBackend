@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TicketHistoriesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'ticket_histories';
+    protected static string $relationship = 'ticketHistories';
 
     protected static ?string $title = 'Historial';
 
@@ -21,7 +21,7 @@ class TicketHistoriesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('cambio_descripcion')
+            ->recordTitleAttribute('comentario')
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Fecha')
@@ -30,8 +30,11 @@ class TicketHistoriesRelationManager extends RelationManager
                 TextColumn::make('user.name')
                     ->label('Usuario')
                     ->placeholder('Sistema'),
-                TextColumn::make('cambio_descripcion')
-                    ->label('Cambio')
+                TextColumn::make('accion')
+                    ->label('Acción')
+                    ->badge(),
+                TextColumn::make('comentario')
+                    ->label('Detalle')
                     ->wrap(),
             ])
             ->defaultSort('created_at', 'desc');

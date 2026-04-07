@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\Tickets\Pages;
 
 use App\Filament\Resources\Tickets\TicketResource;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\Action;
+use App\Models\Comment;
+use App\Services\TicketService;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTicket extends EditRecord
@@ -45,10 +46,10 @@ class EditTicket extends EditRecord
             ->values();
 
         foreach ($changes as $description) {
-            \App\Models\TicketHistory::create([
-                'ticket_id' => $this->record->id,
+            $this->record->ticketHistories()->create([
                 'usuario_id' => auth()->id(),
-                'cambio_descripcion' => $description,
+                'accion' => 'ticket_actualizado',
+                'comentario' => $description,
             ]);
         }
     }
@@ -64,18 +65,9 @@ class EditTicket extends EditRecord
             Action::make('agarrar')
                 ->label('Agarrar Ticket')
                 ->icon('heroicon-o-hand-raised')
-                ->visible(fn () => in_array(auth()->user()->tipo_usuario, ['TECNICO', 'ADMINISTRADOR']) && is_null($this->record->tecnico_id))
+                ->visible(fn () => auth()->user()->can('assign', $this->record))
                 ->action(function () {
-                    $this->record->update([
-                        'tecnico_id' => auth()->id(),
-                        'estado' => 'en_progreso',
-                    ]);
-
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'Ticket asignado a ' . auth()->user()->name . ' y cambiado a En Progreso.',
-                    ]);
+                    app(TicketService::class)->assignTicket($this->record, auth()->user());
 
                     $this->refreshFormData(['tecnico_id', 'estado']);
                 })
@@ -85,10 +77,7 @@ class EditTicket extends EditRecord
                 ->label('Resolver Ticket')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn () => 
-                    in_array($this->record->estado, ['abierto', 'en_progreso']) && 
-                    (auth()->user()->tipo_usuario === 'ADMINISTRADOR' || (auth()->user()->tipo_usuario === 'TECNICO' && $this->record->tecnico_id === auth()->id()))
-                )
+                ->visible(fn () => auth()->user()->can('close', $this->record))
                 ->form([
                     \Filament\Forms\Components\Select::make('categoria')
                         ->label('Categoría de FAQ')
@@ -99,84 +88,50 @@ class EditTicket extends EditRecord
                             'devops' => 'DevOps',
                             'testing' => 'Testing',
                             'seguridad' => 'Seguridad',
+                            'otro' => 'Otro',
+                        ])
+                        ->default('otro'),
+                    \Filament\Forms\Components\TextInput::make('titulo')
+                        ->required()
+                        ->default(fn () => $this->record->titulo),
+                    \Filament\Forms\Components\Textarea::make('descripcion_problema')
+                        ->label('Descripción del problema'),
+                    \Filament\Forms\Components\Textarea::make('resolucion')
+                        ->label('Resolución')
+                        ->required(),
+                    \Filament\Forms\Components\Textarea::make('causa_raiz')
+                        ->label('Causa raíz')
+                        ->required(),
+                    \Filament\Forms\Components\Select::make('tipo_resolucion')
+                        ->options([
+                            'workaround' => 'Workaround',
+                            'solucion_definitiva' => 'Solución definitiva',
                         ])
                         ->required(),
-                    \Filament\Forms\Components\Textarea::make('solucion')
-                        ->label('Solución / Contenido')
+                    \Filament\Forms\Components\Toggle::make('es_reutilizable')
+                        ->default(true)
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    $this->record->update([
-                        'estado' => 'resuelto',
-                    ]);
-
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'Ticket marcado como resuelto por el técnico. A la espera de validación del usuario.',
-                    ]);
-
-                    \App\Models\FaqArticle::create([
-                        'titulo' => $this->record->titulo,
-                        'contenido' => $data['solucion'],
-                        'categoria' => $data['categoria'],
-                        'usuario_id' => auth()->id(),
-                    ]);
-                    $this->refreshFormData(['estado']);
-                })
-                ->successNotificationTitle('Ticket marcado como resuelto.')
-                ->requiresConfirmation(),
-
-            Action::make('aceptar_resolucion')
-                ->label('Aceptar Solución')
-                ->icon('heroicon-o-check-badge')
-                ->color('success')
-                ->visible(fn () => 
-                    $this->record->estado === 'resuelto' && 
-                    auth()->user()->tipo_usuario === 'USUARIO' && $this->record->usuario_id === auth()->id()
-                )
-                ->action(function () {
-                    $this->record->update([
-                        'estado' => 'cerrado',
-                        'fecha_cierre' => now(),
-                    ]);
-
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'El usuario aceptó la solución. El ticket ha sido cerrado.',
-                    ]);
+                    app(TicketService::class)->closeTicket($this->record, auth()->user(), $data);
                     $this->refreshFormData(['estado', 'fecha_cierre']);
                 })
-                ->requiresConfirmation()
-                ->modalHeading('Aceptar Solución')
-                ->modalDescription('¿Estás seguro que la solución resolvió tu problema?'),
+                ->successNotificationTitle('Ticket cerrado y FAQ creado correctamente.')
+                ->requiresConfirmation(),
 
-            Action::make('rechazar_resolucion')
-                ->label('Rechazar Solución')
-                ->icon('heroicon-o-x-circle')
-                ->color('danger')
-                ->visible(fn () => 
-                    $this->record->estado === 'resuelto' && 
-                    auth()->user()->tipo_usuario === 'USUARIO' && $this->record->usuario_id === auth()->id()
-                )
-                ->action(function () {
-                    $this->record->update([
-                        'estado' => 'en_progreso',
+            Action::make('agregarBitacora')
+                ->label('Agregar bitácora')
+                ->visible(fn () => auth()->user()->can('create', [Comment::class, $this->record, Comment::ROL_TECNICO]))
+                ->form([
+                    \Filament\Forms\Components\Textarea::make('contenido')
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    app(TicketService::class)->addComment($this->record, auth()->user(), [
+                        'rol' => Comment::ROL_TECNICO,
+                        'contenido' => $data['contenido'],
                     ]);
-
-                    \App\Models\TicketHistory::create([
-                        'ticket_id' => $this->record->id,
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'El usuario rechazó la solución. El ticket vuelve a estar En Progreso.',
-                    ]);
-                    $this->refreshFormData(['estado']);
-                })
-                ->requiresConfirmation()
-                ->modalHeading('Rechazar Solución')
-                ->modalDescription('¿El problema no fue resuelto?'),
-
-            DeleteAction::make(),
+                }),
         ];
     }
 }

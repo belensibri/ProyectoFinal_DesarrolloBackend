@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('faq_articles', function (Blueprint $table) {
             $table->id();
             $table->string('titulo');
-            $table->text('contenido');
-            $table->enum('categoria', ['backend', 'frontend', 'bases_de_datos', 'devops', 'testing', 'seguridad']);
+            $table->text('descripcion_problema')->nullable();
+            $table->text('resolucion');
+            $table->text('causa_raiz');
+            $table->enum('categoria', ['backend', 'frontend', 'bases_de_datos', 'devops', 'testing', 'seguridad', 'otro'])->default('otro');
+            $table->enum('tipo_resolucion', ['workaround', 'solucion_definitiva'])->default('workaround');
+            $table->boolean('es_reutilizable')->default(true);
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('ticket_id')->unique()->constrained('tickets')->onDelete('cascade');
             $table->timestamps();
         });
     }

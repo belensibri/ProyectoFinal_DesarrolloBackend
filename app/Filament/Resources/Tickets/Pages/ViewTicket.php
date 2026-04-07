@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\Tickets\Pages;
 
 use App\Filament\Resources\Tickets\TicketResource;
+use App\Models\Comment;
+use App\Services\TicketService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -54,29 +57,38 @@ class ViewTicket extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $user = auth()->user();
+
         return [
             Action::make('agregarComentario')
-                ->label('Add comentario')
+                ->label($user->isTecnico() ? 'Agregar bitácora' : 'Agregar comentario')
                 ->icon('heroicon-o-chat-bubble-left-right')
+                ->visible(fn () => $user->can('addComment', $this->record))
                 ->form([
                     Textarea::make('contenido')
                         ->label('Comentario')
                         ->required()
                         ->columnSpanFull(),
+                    FileUpload::make('attachments')
+                        ->label('Imágenes adjuntas')
+                        ->disk('public')
+                        ->directory('ticket-attachments')
+                        ->image()
+                        ->imageEditor()
+                        ->multiple()
+                        ->acceptedFileTypes(['image/png', 'image/jpeg'])
+                        ->visible(fn () => auth()->user()->can('addComment', $this->record)),
                 ])
                 ->action(function (array $data): void {
-                    $this->record->comments()->create([
+                    app(TicketService::class)->addComment($this->record, auth()->user(), [
+                        'rol' => auth()->user()->isTecnico() ? Comment::ROL_TECNICO : Comment::ROL_USUARIO,
                         'contenido' => $data['contenido'],
-                        'usuario_id' => auth()->id(),
-                    ]);
-
-                    $this->record->ticket_histories()->create([
-                        'usuario_id' => auth()->id(),
-                        'cambio_descripcion' => 'Se agrego un comentario al ticket.',
+                        'attachments' => $data['attachments'] ?? [],
                     ]);
                 })
                 ->successNotificationTitle('Comentario agregado correctamente.'),
-            EditAction::make(),
+            EditAction::make()
+                ->visible(fn () => auth()->user()->can('update', $this->record)),
         ];
     }
 }

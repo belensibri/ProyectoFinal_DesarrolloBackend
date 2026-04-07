@@ -26,7 +26,7 @@ class CommentsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return false;
+        return true;
     }
 
     public function form(Schema $schema): Schema
@@ -50,6 +50,8 @@ class CommentsRelationManager extends RelationManager
                 TextColumn::make('user.name')
                     ->label('Usuario')
                     ->placeholder('Sin usuario'),
+                TextColumn::make('rol')
+                    ->badge(),
                 TextColumn::make('contenido')
                     ->searchable()
                     ->wrap(),
@@ -61,13 +63,8 @@ class CommentsRelationManager extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                CreateAction::make(),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
+            ->headerActions([])
+            ->recordActions([])
             ->toolbarActions([]);
     }
 }
