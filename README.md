@@ -1,4 +1,4 @@
-# Sistema de Tickets IT
+# Sistema de Tickets IT y FAQ
 
 ## 1. Resumen del proyecto
 
@@ -525,5 +525,4 @@ Algunas mejoras naturales para la siguiente iteración:
 
 - El panel principal vive en `/admin`.
 - La aplicación está configurada como **Filament-first**.
-- La relación con departamentos existe como recurso administrativo, pero el campo `department_id` fue removido de `tickets` por migración posterior.
 - El historial actual implementado en código es `accion + comentario`, y esa es la fuente correcta para documentación y mantenimiento.
