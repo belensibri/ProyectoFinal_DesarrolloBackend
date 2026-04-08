@@ -44,6 +44,10 @@ class TicketsTable
                     ->label('Ver ticket')
                     ->icon('heroicon-o-eye')
                     ->visible(function (Ticket $record): bool {
+                        if ($record->isClosed()) {
+                            return false;
+                        }
+
                         $user = auth()->user();
 
                         if ($user->isAdministrador()) {

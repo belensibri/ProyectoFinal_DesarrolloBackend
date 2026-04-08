@@ -53,6 +53,7 @@ class TicketResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with(['user', 'technician', 'faqArticle'])
+            ->where('estado', '!=', Ticket::ESTADO_CERRADO)
             ->visibleTo(auth()->user());
     }
 }

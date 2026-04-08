@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\FaqArticles;
 
+use App\Filament\Resources\FaqArticles\Pages\ViewFaqArticle;
 use App\Filament\Resources\FaqArticles\Pages\ListFaqArticles;
 use App\Filament\Resources\FaqArticles\Tables\FaqArticlesTable;
 use App\Models\FaqArticle;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -38,6 +40,12 @@ class FaqArticleResource extends Resource
     {
         return [
             'index' => ListFaqArticles::route('/'),
+            'view' => ViewFaqArticle::route('/{record}'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['ticket', 'user']);
     }
 }
