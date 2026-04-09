@@ -1,0 +1,277 @@
+﻿
+   PASS  Tests\Unit\ExampleTest
+  Γ£ô that true is true                                  0.01s  
+
+   FAIL  Tests\Unit\Models\TicketTest
+  Γ£ô ticket status helpers return correct booleans      0.02s  
+  Γ¿» visible to scope filters tickets for basic user    0.04s  
+  Γ¿» visible to scope filters tickets for tech
+  Γ¿» visible to scope allows admin to see all tickets
+
+   FAIL  Tests\Unit\Models\UserTest
+  Γ¿» user casting and defaults work
+  Γ¿» user role helpers return true for specific types
+
+   FAIL  Tests\Unit\Policies\TicketPolicyTest
+  Γ¿» admin can view, update, reassign any ticket
+  Γ¿» user can only view their own inactive tickets? wait, logic in policy says user view -> my ticket AND NOT active
+  Γ¿» tech can view unassigned active tickets or assigned to them
+  Γ¿» tech can assign an active ticket if not assigned
+  Γ¿» tech can close ticket only if there is a tech comment
+
+   FAIL  Tests\Feature\ExampleTest
+  Γ¿» the application returns a successful response      0.36s  
+
+   FAIL  Tests\Feature\Filament\TicketResourceTest
+  Γ¿» admin dashboard is accessible by users             0.21s  
+  Γ¿» users can list tickets in filament                 0.10s  
+  Γ¿» technician can view ticket creation screen? No, uΓÇª 0.09s  
+  Γ£ô user cannot assign a ticket to themselves via webΓÇª 0.09s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Models\TicketTestΓÇª   RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Models\TicketTestΓÇª   RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Models\TicketTestΓÇª   RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Models\UserTest >ΓÇª   RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Models\UserTest >ΓÇª   RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Policies\TicketPolΓÇª  RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Policies\TicketPolΓÇª  RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Policies\TicketPolΓÇª  RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Policies\TicketPolΓÇª  RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Unit\Policies\TicketPolΓÇª  RuntimeException   
+  A facade root has not been set.
+
+  at vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+    356Γûò     {
+    357Γûò         $instance = static::getFacadeRoot();
+    358Γûò 
+    359Γûò         if (! $instance) {
+  Γ₧£ 360Γûò             throw new RuntimeException('A facade root has not been set.');
+    361Γûò         }
+    362Γûò 
+    363Γûò         return $instance->$method(...$args);
+    364Γûò     }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:360
+  2   database\factories\UserFactory.php:31
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\ExampleTest > the application retΓÇª   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\ExampleTest.php:6
+      2Γûò 
+      3Γûò test('the application returns a successful response', function () {
+      4Γûò     $response = $this->get('/');
+      5Γûò 
+  Γ₧£   6Γûò     $response->assertStatus(200);
+      7Γûò });
+      8Γûò
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\Filament\TicketResourceTest > admΓÇª   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests\Feature\Filament\TicketResourceTest.php:17
+     13Γûò 
+     14Γûò     // Normally filament panel redirects if you have access or directly gives 200
+     15Γûò     // Filament checks `canAccessPanel` inside User model. Wait, let's see if User has canAccessPanel.
+     16Γûò     // If not, it defaults to true on local/testing.
+  Γ₧£  17Γûò     $response->assertStatus(200);
+     18Γûò });
+     19Γûò 
+     20Γûò test('users can list tickets in filament', function () {
+     21Γûò     $user = User::factory()->create(['tipo_usuario' => 'USUARIO']);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\Filament\TicketReΓÇª  QueryException   
+  SQLSTATE[23000]: Integrity constraint violation: 19 NOT NULL constraint failed: tickets.descripcion (Connection: sqlite, Database: :memory:, SQL: insert into "tickets" ("usuario_id", "titulo", "estado", "updated_at", "created_at") values (1, Mi problema en lista, activo, 2026-04-09 04:47:36, 2026-04-09 04:47:36))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:587
+    583Γûò             $this->bindValues($statement, $this->prepareBindings($bindings));
+    584Γûò 
+    585Γûò             $this->recordsHaveBeenModified();
+    586Γûò 
+  Γ₧£ 587Γûò             return $statement->execute();
+    588Γûò         });
+    589Γûò     }
+    590Γûò 
+    591Γûò     /**
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:587
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:830
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\Filament\TicketResourceTest > tecΓÇª   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests\Feature\Filament\TicketResourceTest.php:37
+     33Γûò     $user = User::factory()->create(['tipo_usuario' => 'USUARIO']);
+     34Γûò 
+     35Γûò     $response = $this->actingAs($user)->get('/admin/tickets/create');
+     36Γûò 
+  Γ₧£  37Γûò     $response->assertStatus(200);
+     38Γûò });
+     39Γûò 
+     40Γûò test('user cannot assign a ticket to themselves via web interface', function () {
+     41Γûò     // This is more complex because it goes into Filament actions.
+
+
+  Tests:    14 failed, 3 passed (9 assertions)
+  Duration: 1.12s
+

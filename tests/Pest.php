@@ -14,8 +14,11 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', 'Unit');
+
+uses()->beforeEach(function () {
+    $this->withoutVite();
+})->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
