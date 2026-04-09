@@ -11,3 +11,9 @@
 | request validation are introduced.
 |
 */
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/docs', function () {
+    return redirect('/api/documentation');
+})->name('api.docs');

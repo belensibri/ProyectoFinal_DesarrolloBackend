@@ -1,0 +1,1424 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sistema de Tickets IT - API de referencia",
+        "description": "Documentacion OpenAPI de las operaciones de negocio principales del sistema. La aplicacion opera canonicamente desde Filament, pero estas rutas representan el flujo REST equivalente para fines de integracion y documentacion.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/api/tickets": {
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Crear ticket",
+                "description": "Representa la creacion de un ticket por parte de un usuario final. El ticket siempre nace con estado activo.",
+                "operationId": "createTicket",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "descripcion",
+                                    "categoria",
+                                    "prioridad"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "No puedo conectarme a la VPN",
+                                        "maxLength": 255
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Desde esta manana la conexion falla con error de autenticacion."
+                                    },
+                                    "categoria": {
+                                        "type": "string",
+                                        "example": "seguridad",
+                                        "enum": [
+                                            "backend",
+                                            "frontend",
+                                            "bases_de_datos",
+                                            "devops",
+                                            "testing",
+                                            "seguridad",
+                                            "otro"
+                                        ]
+                                    },
+                                    "prioridad": {
+                                        "type": "string",
+                                        "example": "alta",
+                                        "enum": [
+                                            "baja",
+                                            "media",
+                                            "alta"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ticket creado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo usuarios de tipo USUARIO pueden crear tickets.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validacion.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/tickets/{ticket}": {
+            "patch": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Actualizar ticket",
+                "description": "Permite editar un ticket unicamente antes de que sea asignado. Los tickets cerrados no pueden modificarse.",
+                "operationId": "updateTicket",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "description": "ID del ticket.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 18
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "No puedo conectarme a la VPN corporativa",
+                                        "maxLength": 255
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "El error comenzo despues del cambio de contrasena."
+                                    },
+                                    "categoria": {
+                                        "type": "string",
+                                        "example": "seguridad",
+                                        "enum": [
+                                            "backend",
+                                            "frontend",
+                                            "bases_de_datos",
+                                            "devops",
+                                            "testing",
+                                            "seguridad",
+                                            "otro"
+                                        ]
+                                    },
+                                    "prioridad": {
+                                        "type": "string",
+                                        "example": "media",
+                                        "enum": [
+                                            "baja",
+                                            "media",
+                                            "alta"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ticket actualizado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El usuario no tiene permiso para editar el ticket.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validacion o ticket no editable.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/tickets/{ticket}/assign": {
+            "patch": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Tomar ticket",
+                "description": "Permite que un tecnico tome un ticket activo y lo cambie a en_proceso. Solo tickets activos y sin tecnico asignado pueden ser tomados.",
+                "operationId": "assignTicket",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "description": "ID del ticket.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 18
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket asignado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo tecnicos pueden tomar tickets.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "El ticket no esta disponible para ser tomado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/tickets/{ticket}/comments": {
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Agregar comentario",
+                "description": "Registra un comentario dentro de la conversacion del ticket. Solo el usuario creador o el tecnico asignado pueden comentar mientras el ticket este en_proceso. Los tickets cerrados no aceptan nuevos comentarios.",
+                "operationId": "addTicketComment",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "description": "ID del ticket.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 18
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "contenido"
+                                ],
+                                "properties": {
+                                    "contenido": {
+                                        "type": "string",
+                                        "example": "Probe nuevamente y ahora si conecta."
+                                    },
+                                    "attachments[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Comentario agregado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El usuario no puede participar en la conversacion del ticket.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "El ticket no permite comentarios o el archivo no cumple validaciones.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/tickets/{ticket}/close": {
+            "patch": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Cerrar ticket",
+                "description": "Cierra un ticket en_proceso y crea su registro FAQ asociado. Solo el tecnico asignado puede cerrarlo. Regla importante: un ticket no puede cerrarse sin al menos un comentario tecnico previo.",
+                "operationId": "closeTicket",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "description": "ID del ticket.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 18
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "resolucion",
+                                    "causa_raiz",
+                                    "tipo_resolucion",
+                                    "es_reutilizable"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "Error de autenticacion en VPN corporativa"
+                                    },
+                                    "descripcion_problema": {
+                                        "type": "string",
+                                        "example": "Usuarios remotos no podian autenticarse tras el cambio de contrasena.",
+                                        "nullable": true
+                                    },
+                                    "resolucion": {
+                                        "type": "string",
+                                        "example": "Se regenero la configuracion del cliente y se reinicio el servicio de autenticacion."
+                                    },
+                                    "causa_raiz": {
+                                        "type": "string",
+                                        "example": "La configuracion local del cliente quedo desfasada."
+                                    },
+                                    "tipo_resolucion": {
+                                        "type": "string",
+                                        "example": "solucion_definitiva",
+                                        "enum": [
+                                            "workaround",
+                                            "solucion_definitiva"
+                                        ]
+                                    },
+                                    "es_reutilizable": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "categoria": {
+                                        "type": "string",
+                                        "example": "seguridad",
+                                        "enum": [
+                                            "backend",
+                                            "frontend",
+                                            "bases_de_datos",
+                                            "devops",
+                                            "testing",
+                                            "seguridad",
+                                            "otro"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ticket cerrado y FAQ creada correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El usuario no es el tecnico asignado al ticket.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "No se puede cerrar el ticket por reglas del negocio o errores de validacion.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/tickets/{ticket}/reassign": {
+            "patch": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Reasignar ticket",
+                "description": "Permite a un administrador cambiar el tecnico asignado. Solo los administradores pueden reasignar tickets y unicamente cuando el ticket esta en_proceso.",
+                "operationId": "reassignTicket",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "description": "ID del ticket.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 18
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tecnico_id"
+                                ],
+                                "properties": {
+                                    "tecnico_id": {
+                                        "type": "integer",
+                                        "example": 15
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ticket reasignado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden reasignar tickets.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "El ticket no esta en proceso o el tecnico no es valido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/faq-articles": {
+            "get": {
+                "tags": [
+                    "FAQ"
+                ],
+                "summary": "Listar FAQ",
+                "description": "Devuelve la base de conocimiento generada al cerrar tickets. Disponible para usuarios, tecnicos y administradores.",
+                "operationId": "listFaqArticles",
+                "responses": {
+                    "200": {
+                        "description": "Listado de articulos FAQ.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/FaqArticle"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El usuario no tiene permisos para consultar FAQ.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/faq-articles/{faqArticle}": {
+            "get": {
+                "tags": [
+                    "FAQ"
+                ],
+                "summary": "Ver articulo FAQ",
+                "description": "Obtiene el detalle de un articulo FAQ asociado a un ticket cerrado.",
+                "operationId": "showFaqArticle",
+                "parameters": [
+                    {
+                        "name": "faqArticle",
+                        "in": "path",
+                        "description": "ID del articulo FAQ.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 6
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del articulo FAQ.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FaqArticle"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El usuario no tiene permisos para consultar FAQ.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Articulo FAQ no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Listar usuarios",
+                "description": "Devuelve el listado de usuarios del sistema. Solo administradores pueden gestionar usuarios.",
+                "operationId": "listUsers",
+                "responses": {
+                    "200": {
+                        "description": "Listado de usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden consultar usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Crear usuario",
+                "description": "Permite a un administrador registrar usuarios del sistema y definir su rol.",
+                "operationId": "createUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "tipo_usuario"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Maria Lopez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "maria.lopez@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Secret123!"
+                                    },
+                                    "tipo_usuario": {
+                                        "type": "string",
+                                        "example": "TECNICO",
+                                        "enum": [
+                                            "USUARIO",
+                                            "TECNICO",
+                                            "ADMINISTRADOR"
+                                        ]
+                                    },
+                                    "email_verified_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-04-08T08:00:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden crear usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validacion.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Ver usuario",
+                "description": "Obtiene el detalle de un usuario del sistema. Operacion reservada a administradores.",
+                "operationId": "showUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID del usuario.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del usuario.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden consultar usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Eliminar usuario",
+                "description": "Permite a un administrador eliminar un usuario del sistema.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID del usuario.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuario eliminado correctamente."
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden eliminar usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Actualizar usuario",
+                "description": "Permite a un administrador actualizar datos del usuario, incluyendo su rol.",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID del usuario.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Maria Lopez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "maria.lopez@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NuevoSecret123!"
+                                    },
+                                    "tipo_usuario": {
+                                        "type": "string",
+                                        "example": "ADMINISTRADOR",
+                                        "enum": [
+                                            "USUARIO",
+                                            "TECNICO",
+                                            "ADMINISTRADOR"
+                                        ]
+                                    },
+                                    "email_verified_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-04-08T08:00:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario actualizado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo administradores pueden actualizar usuarios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validacion.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Ticket": {
+                "required": [
+                    "id",
+                    "usuario_id",
+                    "titulo",
+                    "descripcion",
+                    "categoria",
+                    "estado",
+                    "prioridad",
+                    "fecha_creacion"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 18
+                    },
+                    "usuario_id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "tecnico_id": {
+                        "type": "integer",
+                        "example": 12,
+                        "nullable": true
+                    },
+                    "titulo": {
+                        "type": "string",
+                        "example": "No puedo conectarme a la VPN"
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Al intentar conectarme aparece un error de autenticacion."
+                    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "seguridad",
+                        "enum": [
+                            "backend",
+                            "frontend",
+                            "bases_de_datos",
+                            "devops",
+                            "testing",
+                            "seguridad",
+                            "otro"
+                        ]
+                    },
+                    "estado": {
+                        "type": "string",
+                        "example": "en_proceso",
+                        "enum": [
+                            "activo",
+                            "en_proceso",
+                            "cerrado"
+                        ]
+                    },
+                    "prioridad": {
+                        "type": "string",
+                        "example": "alta",
+                        "enum": [
+                            "baja",
+                            "media",
+                            "alta"
+                        ]
+                    },
+                    "fecha_creacion": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T10:15:00Z"
+                    },
+                    "fecha_cierre": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T13:40:00Z",
+                        "nullable": true
+                    },
+                    "faq_article": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FaqArticle"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T10:15:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T11:20:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Comment": {
+                "required": [
+                    "id",
+                    "ticket_id",
+                    "usuario_id",
+                    "rol",
+                    "contenido"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 31
+                    },
+                    "ticket_id": {
+                        "type": "integer",
+                        "example": 18
+                    },
+                    "usuario_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "rol": {
+                        "type": "string",
+                        "example": "tecnico",
+                        "enum": [
+                            "tecnico",
+                            "usuario"
+                        ]
+                    },
+                    "contenido": {
+                        "type": "string",
+                        "example": "Se reinicio el servicio de autenticacion y la conexion volvio a funcionar."
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Attachment"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T11:05:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T11:05:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Attachment": {
+                "required": [
+                    "id",
+                    "ruta_archivo",
+                    "size"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "ruta_archivo": {
+                        "type": "string",
+                        "example": "comments/31/captura-vpn.png"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "captura-vpn.png",
+                        "nullable": true
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "image/png",
+                        "nullable": true
+                    },
+                    "size": {
+                        "type": "integer",
+                        "example": 184532
+                    }
+                },
+                "type": "object"
+            },
+            "FaqArticle": {
+                "required": [
+                    "id",
+                    "ticket_id",
+                    "titulo",
+                    "resolucion",
+                    "causa_raiz",
+                    "tipo_resolucion",
+                    "es_reutilizable",
+                    "categoria",
+                    "usuario_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 6
+                    },
+                    "ticket_id": {
+                        "type": "integer",
+                        "example": 18
+                    },
+                    "titulo": {
+                        "type": "string",
+                        "example": "Error de autenticacion en VPN corporativa"
+                    },
+                    "descripcion_problema": {
+                        "type": "string",
+                        "example": "Usuarios remotos no podian autenticarse al intentar conectarse.",
+                        "nullable": true
+                    },
+                    "resolucion": {
+                        "type": "string",
+                        "example": "Se reinicio el servicio y se regenero la configuracion del cliente afectado."
+                    },
+                    "causa_raiz": {
+                        "type": "string",
+                        "example": "Configuracion desincronizada despues de una actualizacion."
+                    },
+                    "tipo_resolucion": {
+                        "type": "string",
+                        "example": "solucion_definitiva",
+                        "enum": [
+                            "workaround",
+                            "solucion_definitiva"
+                        ]
+                    },
+                    "es_reutilizable": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "seguridad",
+                        "enum": [
+                            "backend",
+                            "frontend",
+                            "bases_de_datos",
+                            "devops",
+                            "testing",
+                            "seguridad",
+                            "otro"
+                        ]
+                    },
+                    "usuario_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T13:40:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T13:40:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "tipo_usuario"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Maria Lopez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "maria.lopez@example.com"
+                    },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T08:00:00Z",
+                        "nullable": true
+                    },
+                    "tipo_usuario": {
+                        "type": "string",
+                        "example": "TECNICO",
+                        "enum": [
+                            "USUARIO",
+                            "TECNICO",
+                            "ADMINISTRADOR"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T07:30:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-08T09:10:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "ticket": [
+                                "Debe existir al menos un comentario tecnico antes de cerrar el ticket."
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ForbiddenError": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "This action is unauthorized."
+                    }
+                },
+                "type": "object"
+            },
+            "NotFoundError": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "No query results for model [App\\Models\\Ticket] 18"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctumBearer": {
+                "type": "http",
+                "description": "Token de acceso autenticado con Laravel Sanctum.",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Tickets",
+            "description": "Operaciones centrales del ciclo de vida de tickets."
+        },
+        {
+            "name": "FAQ",
+            "description": "Consulta de articulos generados al cerrar tickets."
+        },
+        {
+            "name": "Users",
+            "description": "Gestion administrativa de usuarios."
+        }
+    ]
+}
